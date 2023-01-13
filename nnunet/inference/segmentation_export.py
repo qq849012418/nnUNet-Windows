@@ -277,7 +277,7 @@ def save_softmax_nifti_from_softmax(segmentation_softmax: Union[str, np.ndarray]
 
     file_to_read = open(segmentation_softmax[:-4] + ".pkl", "rb")
     properties_dict = pickle.load(file_to_read)
-
+    properties_dict=properties_dict[0]
     shape_original_after_cropping = properties_dict.get('size_after_cropping')
     shape_original_before_cropping = properties_dict.get('original_size_of_raw_data')
 
@@ -323,6 +323,7 @@ def save_softmax_nifti_from_softmax(segmentation_softmax: Union[str, np.ndarray]
     seg_resized_itk.SetSpacing(properties_dict['itk_spacing'])
     seg_resized_itk.SetOrigin(properties_dict['itk_origin'])
     seg_resized_itk.SetDirection(properties_dict['itk_direction'])
+    # seg_resized_itk.SetDirection([1,0,0,0,1,0,0,0,1])
     sitk.WriteImage(seg_resized_itk, out_fname)
 
     if (non_postprocessed_fname is not None) and (seg_postprogess_fn is not None):

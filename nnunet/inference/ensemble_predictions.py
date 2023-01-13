@@ -16,12 +16,12 @@
 import shutil
 from copy import deepcopy
 
-from nnunet.inference.segmentation_export import save_segmentation_nifti_from_softmax
+from nnunet.inference.segmentation_export import save_segmentation_nifti_from_softmax, save_softmax_nifti_from_softmax
 from batchgenerators.utilities.file_and_folder_operations import *
 import numpy as np
 from multiprocessing import Pool
 from nnunet.postprocessing.connected_components import apply_postprocessing_to_folder, load_postprocessing
-
+import time
 
 def merge_files(files, properties_files, out_file, override, store_npz):
     if override or not isfile(out_file):
@@ -48,9 +48,12 @@ def merge_files(files, properties_files, out_file, override, store_npz):
         # don't matter here)
         save_segmentation_nifti_from_softmax(softmax, out_file, props[0], 3, regions_class_order, None, None,
                                              force_separate_z=None)
+
         if store_npz:
             np.savez_compressed(out_file[:-7] + ".npz", softmax=softmax)
             save_pickle(props, out_file[:-7] + ".pkl")
+
+
 
 
 def merge(folders, output_folder, threads, override=True, postprocessing_file=None, store_npz=False):
@@ -122,6 +125,9 @@ def main():
     npz = args.npz
 
     merge(folders, output_folder, threads, override=True, postprocessing_file=pp_file, store_npz=npz)
+
+    # time.sleep(10)
+
 
 
 if __name__ == "__main__":
