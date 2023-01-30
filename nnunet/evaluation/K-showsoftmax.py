@@ -1,6 +1,6 @@
 # a matplotlib test
 import numpy as np
-
+import scipy.io as sio
 import random
 from matplotlib import pyplot as plt
 from matplotlib.font_manager import FontProperties
@@ -36,14 +36,20 @@ def draw():
     # ax.set_xticklabels(xLabel)
     # 作图并选择热图的颜色填充风格，这里选择hot
     label = 3
-    slice = 33
-    im = ax.imshow(sm[label,slice,:,:], cmap=plt.cm.viridis)
+    slice = 17
+    # im = ax.imshow(sm[label,slice,:,:], cmap=plt.cm.viridis)
+    im = ax.imshow(sm[label, slice, :, :], cmap=plt.cm.gray)
     # 增加右侧的颜色刻度条
     plt.colorbar(im)
     # 增加标题
     plt.title('probablity map of label '+str(label)+', slice: '+str(slice), fontproperties=font)
     # show
     plt.show()
+
+    # keenster add for softmax save
+    sio.savemat(
+        r"D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_126.mat",
+        data)
 
 
 d = draw()
@@ -52,7 +58,6 @@ d = draw()
 
 from nnunet.inference.segmentation_export import save_softmax_nifti_from_softmax
 
-# keenster add for softmax save
 
 
 
