@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 font = FontProperties(fname=r'E:\Windows\Fonts\times.ttf')
-
+id='130'
 
 def draw():
     # # 定义热图的横纵坐标
@@ -23,7 +23,7 @@ def draw():
     #     data.append(temp)
 
     data = np.load(
-        r'D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_126.npz')
+        r'D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_'+id+'.npz')
     sm=data['softmax']
     # 作图阶段
     fig = plt.figure()
@@ -48,7 +48,7 @@ def draw():
 
     # keenster add for softmax save
     sio.savemat(
-        r"D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_126.mat",
+        r'D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_'+id+'.mat',
         data)
 
 
