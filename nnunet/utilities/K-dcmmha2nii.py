@@ -71,10 +71,11 @@ for root, dirs, files in os.walk(path):
                 reader = sitk.ImageFileReader()
                 reader.SetFileName(root + "\\" + file)
                 image = reader.Execute()
-                image_r=resize_image_itk(image,sitk.ReadImage(dist_dir+"\\"+patient_name+".nii.gz"))
+                image_r=resize_image_itk(image,sitk.ReadImage(dist_dir+"\\"+patient_name+".nii.gz"))#因为脊柱和原图的方向是不一样的，建议转！虽然这样会损失掉部分
                 writer = sitk.ImageFileWriter()
                 writer.SetFileName(dist_dir + "\\" + file[0:file.find(".")] + ".nii.gz")
                 writer.Execute(image_r)
+                # writer.Execute(image)
 
 
 
