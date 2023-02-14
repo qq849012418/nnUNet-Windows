@@ -35,19 +35,20 @@ class Evaluator:
     """
 
     default_metrics = [
-        "False Positive Rate",
+        # "False Positive Rate",
         "Dice",
         "Jaccard",
-        "Precision",
-        "Recall",
-        "Accuracy",
-        "False Omission Rate",
-        "Negative Predictive Value",
-        "False Negative Rate",
-        "True Negative Rate",
-        "False Discovery Rate",
-        "Total Positives Test",
-        "Total Positives Reference"
+        "Hausdorff Distance 95",
+        # "Precision",
+        # "Recall",
+        # "Accuracy",
+        # "False Omission Rate",
+        # "Negative Predictive Value",
+        # "False Negative Rate",
+        # "True Negative Rate",
+        # "False Discovery Rate",
+        # "Total Positives Test",
+        # "Total Positives Reference"
     ]
 
     default_advanced_metrics = [
@@ -325,7 +326,7 @@ def aggregate_scores(test_ref_pairs,
                      json_output_file=None,
                      json_name="",
                      json_description="",
-                     json_author="Fabian",
+                     json_author="Keenster",
                      json_task="",
                      num_threads=2,
                      **metric_kwargs):

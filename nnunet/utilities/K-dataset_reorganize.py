@@ -45,6 +45,7 @@ if __name__ == "__main__":
     # target_imagesVal = join(target_base, "imagesVal")
     target_imagesTs = join(target_base, "imagesTs")
     target_labelsTr = join(target_base, "labelsTr")
+    target_labelsTs = join(target_base, "labelsTs")
 
     # maybe_mkdir_p(target_imagesTr)
     # # maybe_mkdir_p(target_imagesVal)
@@ -57,6 +58,8 @@ if __name__ == "__main__":
         os.makedirs(target_imagesTs)
     if not os.path.exists(target_labelsTr):
         os.makedirs(target_labelsTr)
+    if not os.path.exists(target_labelsTs):
+        os.makedirs(target_labelsTs)
     patient_names = []
     trainset=[]
     testset=[]
@@ -78,6 +81,7 @@ if __name__ == "__main__":
         if int(id)%6==0:
             testset.append(id)
             shutil.copy(ori_img, join(target_imagesTs, patient_name + "_0000.nii.gz"))
+            shutil.copy(seg_img, join(target_labelsTs, patient_name + ".nii.gz"))
         else:
             trainset.append(id)
             shutil.copy(ori_img, join(target_imagesTr, patient_name + "_0000.nii.gz"))
