@@ -6,7 +6,8 @@ from matplotlib import pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 font = FontProperties(fname=r'E:\Windows\Fonts\times.ttf')
-id='130'
+npz_path= r'D:/Keenster/Projects/nnUnet-base/DATASET/nnUNet_raw/nnUNet_raw_data/Task502_Study45-9/inferTs/f-all/'
+id='06'
 
 def draw():
     # # 定义热图的横纵坐标
@@ -23,7 +24,7 @@ def draw():
     #     data.append(temp)
 
     data = np.load(
-        r'D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_'+id+'.npz')
+        npz_path+'Study_'+id+'.npz')
     sm=data['softmax']
     # 作图阶段
     fig = plt.figure()
@@ -36,9 +37,13 @@ def draw():
     # ax.set_xticklabels(xLabel)
     # 作图并选择热图的颜色填充风格，这里选择hot
     label = 3
-    slice = 17
+    slice = 40
     # im = ax.imshow(sm[label,slice,:,:], cmap=plt.cm.viridis)
-    im = ax.imshow(sm[label, slice, :, :], cmap=plt.cm.gray)
+    # im = ax.imshow(sm[label, slice, :, :], cmap=plt.cm.gray)
+    p3=sm[label, slice, :, :]/(sm[0, slice, :, :]+sm[label, slice, :, :])
+    # p3=sm[label, slice, :, :]
+
+    im = ax.imshow(p3*(1-p3), cmap=plt.cm.gray)
     # 增加右侧的颜色刻度条
     plt.colorbar(im)
     # 增加标题
@@ -46,10 +51,10 @@ def draw():
     # show
     plt.show()
 
-    # keenster add for softmax save
-    sio.savemat(
-        r'D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task501_Study\inferTs\merged\Study_'+id+'.mat',
-        data)
+    # # keenster add for softmax save
+    # sio.savemat(
+    #     npz_path+'Study_'+id+'.mat',
+    #     data)
 
 
 d = draw()
