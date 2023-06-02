@@ -6,8 +6,8 @@ from matplotlib import pyplot as plt
 from matplotlib.font_manager import FontProperties
 
 font = FontProperties(fname=r'E:\Windows\Fonts\times.ttf')
-npz_path= r'D:/Keenster/Projects/nnUnet-base/DATASET/nnUNet_raw/nnUNet_raw_data/Task502_Study45-9/inferTs/f-all/'
-id='06'
+npz_path= 'D:/Keenster/Projects/nnUnet-base/DATASET/nnUNet_raw/Dataset503_XHWY/inferTs/f-all2/'
+id='100'
 
 def draw():
     # # 定义热图的横纵坐标
@@ -24,8 +24,16 @@ def draw():
     #     data.append(temp)
 
     data = np.load(
-        npz_path+'Study_'+id+'.npz')
-    sm=data['softmax']
+        npz_path+'XH_'+id+'.npz')
+    tmp=data['probabilities']
+    sm = data['probabilities']
+    sm[0,:,:,:]=tmp[0,:,:,:]
+    sm[1, :, :, :]=tmp[4,:,:,:]
+    sm[2, :, :, :] =tmp[3,:,:,:]
+    sm[3, :, :, :] =tmp[2,:,:,:]
+    sm[4, :, :, :] = tmp[1,:,:,:]
+    # data['probabilities']=sm
+    # sm=data['probabilities']
     # 作图阶段
     fig = plt.figure()
     # 定义画布为1*1个划分，并在第1个位置上进行作图
@@ -36,14 +44,15 @@ def draw():
     # ax.set_xticks(range(len(xLabel)))
     # ax.set_xticklabels(xLabel)
     # 作图并选择热图的颜色填充风格，这里选择hot
-    label = 3
-    slice = 40
+    label = 2
+    slice = 10
     # im = ax.imshow(sm[label,slice,:,:], cmap=plt.cm.viridis)
-    # im = ax.imshow(sm[label, slice, :, :], cmap=plt.cm.gray)
-    p3=sm[label, slice, :, :]/(sm[0, slice, :, :]+sm[label, slice, :, :])
-    # p3=sm[label, slice, :, :]
+    im = ax.imshow(sm[label, slice, :, :], cmap=plt.cm.gray)
 
-    im = ax.imshow(p3*(1-p3), cmap=plt.cm.gray)
+
+    # p3=sm[label, slice, :, :]/(sm[0, slice, :, :]+sm[label, slice, :, :])
+    # p3=sm[label, slice, :, :]
+    # im = ax.imshow(p3*(1-p3), cmap=plt.cm.gray)
     # 增加右侧的颜色刻度条
     plt.colorbar(im)
     # 增加标题
@@ -51,10 +60,10 @@ def draw():
     # show
     plt.show()
 
-    # # keenster add for softmax save
-    # sio.savemat(
-    #     npz_path+'Study_'+id+'.mat',
-    #     data)
+    # keenster add for softmax save
+    sio.savemat(
+        npz_path+'XH_'+id+'.mat',
+        data)
 
 
 d = draw()

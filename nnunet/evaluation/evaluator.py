@@ -354,6 +354,7 @@ def aggregate_scores(test_ref_pairs,
     all_scores = OrderedDict()
     all_scores["all"] = []
     all_scores["mean"] = OrderedDict()
+    all_scores["std"] = OrderedDict()
 
     test = [i[0] for i in test_ref_pairs]
     ref = [i[1] for i in test_ref_pairs]
@@ -375,6 +376,12 @@ def aggregate_scores(test_ref_pairs,
                 if score not in all_scores["mean"][label]:
                     all_scores["mean"][label][score] = []
                 all_scores["mean"][label][score].append(value)
+            if label not in all_scores["std"]:
+                all_scores["std"][label] = OrderedDict()
+            for score, value in score_dict.items():
+                if score not in all_scores["std"][label]:
+                    all_scores["std"][label][score] = []
+                all_scores["std"][label][score].append(value)
 
     for label in all_scores["mean"]:
         for score in all_scores["mean"][label]:
@@ -382,7 +389,12 @@ def aggregate_scores(test_ref_pairs,
                 all_scores["mean"][label][score] = float(np.nanmean(all_scores["mean"][label][score]))
             else:
                 all_scores["mean"][label][score] = float(np.mean(all_scores["mean"][label][score]))
-
+    for label in all_scores["std"]:
+        for score in all_scores["std"][label]:
+            if nanmean:
+                all_scores["std"][label][score] = float(np.nanstd(all_scores["std"][label][score]))
+            else:
+                all_scores["std"][label][score] = float(np.std(all_scores["std"][label][score]))
     # save to file if desired
     # we create a hopefully unique id by hashing the entire output dictionary
     if json_output_file is not None:
@@ -483,5 +495,14 @@ def nnunet_evaluate_folder():
     args = parser.parse_args()
     return evaluate_folder(args.ref, args.pred, args.l)
 
+# -ref
+# D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task502_Study45-9\labelsTs
+# -pred
+# D:\Keenster\Projects\nnUnet-base\DATASET\nnUNet_raw\nnUNet_raw_data\Task502_Study45-9\inferTs\f-all
+# -l
+# 1
+# 2
+# 3
+# 4
 if __name__ == '__main__':
     print(nnunet_evaluate_folder())
