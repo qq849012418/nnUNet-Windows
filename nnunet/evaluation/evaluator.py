@@ -356,6 +356,18 @@ def aggregate_scores(test_ref_pairs,
     all_scores["mean"] = OrderedDict()
     all_scores["std"] = OrderedDict()
 
+    # only for muscle
+    # open dataset
+    # muscle_names=["psoas_left","psoas_right","erector_spinae_left","erector_spinae_right"]
+    # XH dataset
+    muscle_names=["PML","PMR","ESL","ESR","MFL","MFR"]
+
+
+    musle_num= len(muscle_names)
+    for i in range(musle_num):
+        all_scores[str(i)+"mean"] = OrderedDict()
+        all_scores[str(i)+"std"] = OrderedDict()
+
     test = [i[0] for i in test_ref_pairs]
     ref = [i[1] for i in test_ref_pairs]
     p = Pool(num_threads)
@@ -383,6 +395,23 @@ def aggregate_scores(test_ref_pairs,
                     all_scores["std"][label][score] = []
                 all_scores["std"][label][score].append(value)
 
+            # only for muscle
+            for j in range(musle_num):
+                if muscle_names[j] in test[i]:
+                    if label not in all_scores[str(j)+"mean"]:
+                        all_scores[str(j)+"mean"][label] = OrderedDict()
+                    for score, value in score_dict.items():
+                        if score not in all_scores[str(j)+"mean"][label]:
+                            all_scores[str(j)+"mean"][label][score] = []
+                        all_scores[str(j)+"mean"][label][score].append(value)
+                    if label not in all_scores[str(j)+"std"]:
+                        all_scores[str(j)+"std"][label] = OrderedDict()
+                    for score, value in score_dict.items():
+                        if score not in all_scores[str(j)+"std"][label]:
+                            all_scores[str(j)+"std"][label][score] = []
+                        all_scores[str(j)+"std"][label][score].append(value)
+                    break
+
     for label in all_scores["mean"]:
         for score in all_scores["mean"][label]:
             if nanmean:
@@ -395,6 +424,30 @@ def aggregate_scores(test_ref_pairs,
                 all_scores["std"][label][score] = float(np.nanstd(all_scores["std"][label][score]))
             else:
                 all_scores["std"][label][score] = float(np.std(all_scores["std"][label][score]))
+
+    # only for muscle
+    for j in range(musle_num):
+        for label in all_scores[str(j)+"mean"]:
+            for score in all_scores[str(j)+"mean"][label]:
+                if nanmean:
+                    all_scores[str(j)+"mean"][label][score] = float(np.nanmean(all_scores[str(j)+"mean"][label][score]))
+                else:
+                    all_scores[str(j)+"mean"][label][score] = float(np.mean(all_scores[str(j)+"mean"][label][score]))
+        for label in all_scores[str(j)+"std"]:
+            for score in all_scores[str(j)+"std"][label]:
+                if nanmean:
+                    all_scores[str(j)+"std"][label][score] = float(np.nanstd(all_scores[str(j)+"std"][label][score]))
+                else:
+                    all_scores[str(j)+"std"][label][score] = float(np.std(all_scores[str(j)+"std"][label][score]))
+                if j>0 and j%2==1:
+                    meansc=(all_scores[str(j)+"mean"][label][score]+all_scores[str(j-1)+"mean"][label][score])/2
+                    meanst=(all_scores[str(j)+"std"][label][score]+all_scores[str(j-1)+"std"][label][score])/2
+                    if meansc<1:
+                        meansc=meansc*100
+                    if meanst<1:
+                        meanst=meanst*100
+                    print(str(round(meansc, 2))+'±'+str(round(meanst, 2)))
+
     # save to file if desired
     # we create a hopefully unique id by hashing the entire output dictionary
     if json_output_file is not None:
