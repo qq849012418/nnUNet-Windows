@@ -46,14 +46,31 @@ def save_subfig(fig,ax,save_path,fig_name):
 
 def main():
     mask_base_path = r'E:\KeensterFiles\MedDatav2\forCmopare'
-    gt_name = 'Study45-9_gt'
-    algo_name_list = ['Study45-9_DeepSSM','Study_gtacm','Study_gtsam','Study45-9_ssm','Study45-9_ssmrcf']
-    patient_id = 'Study_12'
+    img_and_gt_mode=False
+    nnunet_mode=False
 
-    muscle_name_list = ["psoas_left", "psoas_right", "erector_spinae_left", "erector_spinae_right"]
-    # muscle_name_list=["PML","PMR","ESL","ESR","MFL","MFR"]
+    # gt_name = 'Study45-9_gt'
+    # gt_name = 'Study45-9_gt(alltoone)'
+    # gt_name = 'Study45-9_gt(simpleseg)'
+    gt_name = 'cewan-gt'
+    # gt_name = 'cewan-gtall'
+    # gt_name = 'cewan-gt(simpleseg)'
 
-    selected_slice = 20  # Specify the desired z-slice
+
+    # algo_name_list = ['Study45-9_DeepSSM','Study_gtacm','Study_gtsam','Study45-9_ssm','Study45-9_ssmrcf']
+    # algo_name_list = ['Study5-1_nnunet','Study45-9_nnunet(alltoone)']
+    # algo_name_list = ['Study5-1_simpleseg','Study45-9_simpleseg']
+    algo_name_list = ['cewan_DeepSSM','cewan-ssracm','cewan-gt+sam','cewan-ssm','cewan-ssmrcf']
+    # algo_name_list = ['cewan-nnunet']
+    # algo_name_list = ['cewan-simpleseg']
+
+    # patient_id = 'Study_12'
+    patient_id = 'PUMCH_006'
+
+    # muscle_name_list = ["psoas_left", "psoas_right", "erector_spinae_left", "erector_spinae_right"]
+    muscle_name_list=["PML","PMR","ESL","ESR","MFL","MFR"]
+
+    selected_slice = 11  # Specify the desired z-slice
     tp_color = [255, 255, 0]  # Yellow color for TP
     fp_color = [255, 0, 0]  # Red color for FP
     fn_color = [0, 255,0]  # Green color for FN
@@ -61,12 +78,14 @@ def main():
     fp_alpha = 0.5  # Transparency for FP
     fn_alpha = 0.5  # Transparency for FN
     background_darken_factor = 0.25  # Factor to darken the background image https://blog.csdn.net/xvvoly/article/details/105157455
-    cropping_ratio = 0.5  # Cropping ratio (0.8 means 80% of the original size)
+    cropping_ratio = 1  # Cropping ratio (0.8 means 80% of the original size) #0.5/0.8/0.85 for study 0.75/1 for XH
     img_out_path=os.path.join(mask_base_path,'ResultVisualization')
     if not os.path.exists(img_out_path):
         os.makedirs(img_out_path)
 
     background_path = 'D:\\Keenster\\MatlabScripts\\KeensterSSM\\'+patient_id+'\\'+patient_id+'.nii.gz'  # Replace with the path to your background image
+    # background_path = 'D:\\Keenster\\Projects\\simpleseg-master\\AtlasSeg-Muscle\\data\\NIFTI_CONVERTED\\'+patient_id+'\\'+patient_id+'.nii.gz'  # Replace with the path to your background image
+
     background = sitk.ReadImage(background_path)
     background = sitk.GetArrayFromImage(background[:, :, selected_slice])
     # Normalize background pixel values to [0, 255]
@@ -77,13 +96,18 @@ def main():
     # plt.subplot(121)
     # plt.imshow(background_crop, cmap='gray')
     # # plt.title('Image')
+
     algosize=len(algo_name_list)
     for i in range(algosize):
         algo_name = algo_name_list[i]
         overlay_list=[]
-        for mus_name in muscle_name_list:
-            mask_path = os.path.join(mask_base_path,gt_name,patient_id+"_"+mus_name+".nii.gz") # Replace with the path to your mask image
-            prd_path = os.path.join(mask_base_path,algo_name,patient_id+"_"+mus_name+".nii.gz")  # Replace with the path to your prediction image
+        gt_list=[]
+        if nnunet_mode:
+            mask_path = os.path.join(mask_base_path, gt_name,
+                                     patient_id  + ".nii.gz")  # Replace with the path to your mask image
+            prd_path = os.path.join(mask_base_path, algo_name,
+                                    patient_id  + ".nii.gz")  # Replace with the path to your prediction image
+
             mask = sitk.ReadImage(mask_path)
             prd = sitk.ReadImage(prd_path)
 
@@ -106,21 +130,60 @@ def main():
             prd = prd[top_h:bottom_h, left_w:right_w]
             background_crop = background[top_h:bottom_h, left_w:right_w]
 
-            overlay = overlay_images(mask, prd, tp_color, fp_color, fn_color, tp_alpha, fp_alpha, fn_alpha)
-            overlay_list.append(overlay)
+            for j in range(1,len(muscle_name_list)+1):
+                mask_j=np.zeros(mask.shape, dtype=np.uint8)
+                prd_j=np.zeros(mask.shape, dtype=np.uint8)
+                mask_j[mask==j]=1
+                prd_j[prd == j] = 1
+                overlay = overlay_images(mask_j, prd_j, tp_color, fp_color, fn_color, tp_alpha, fp_alpha, fn_alpha)
+                overlay_list.append(overlay)
+        else:
+            for mus_name in muscle_name_list:
+                mask_path = os.path.join(mask_base_path,gt_name,patient_id+"_"+mus_name+".nii.gz") # Replace with the path to your mask image
+                prd_path = os.path.join(mask_base_path,algo_name,patient_id+"_"+mus_name+".nii.gz")  # Replace with the path to your prediction image
+                mask = sitk.ReadImage(mask_path)
+                prd = sitk.ReadImage(prd_path)
+
+                # Select the desired z-slice for both mask and prediction
+                mask = sitk.GetArrayFromImage(mask[:, :, selected_slice])
+                prd = sitk.GetArrayFromImage(prd[:, :, selected_slice])
+
+                # Calculate cropping dimensions
+                crop_height, crop_width = mask.shape[0], mask.shape[1]
+                center_h, center_w = crop_height // 2, crop_width // 2
+                new_height = int(crop_height * cropping_ratio)
+                new_width = int(crop_width * cropping_ratio)
+                top_h = center_h - new_height // 2
+                left_w = center_w - new_width // 2
+                bottom_h = top_h + new_height
+                right_w = left_w + new_width
+
+                # Crop mask, prediction, and background to the specified ratio
+                mask = mask[top_h:bottom_h, left_w:right_w]
+                prd = prd[top_h:bottom_h, left_w:right_w]
+                background_crop = background[top_h:bottom_h, left_w:right_w]
+
+                overlay = overlay_images(mask, prd, tp_color, fp_color, fn_color, tp_alpha, fp_alpha, fn_alpha)
+                overlay_list.append(overlay)
+                gt_list.append(mask)
 
         final_overlay=sum(overlay_list)
 
         ax=plt.subplot(100+algosize*10+i+1)
         plt.imshow(background_crop, cmap='gray', vmin=255*background_darken_factor,vmax=255)
         plt.imshow(final_overlay, alpha=1)
-        # plt.title('Custom Overlay (TP, FP, FN) on Background')
         plt.tight_layout()
         plt.axis('off')
         save_subfig(fig, ax, img_out_path, patient_id + '#' + str(selected_slice)+ '#' +algo_name + '.png')
     plt.title('Slice='+str(selected_slice))
     plt.show()
-    fig.savefig(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'.png'))
+    fig.savefig(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'#part1.png'))
+    if img_and_gt_mode:
+        plt.imsave(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'#img.png'),background_crop, cmap='gray')
+        final_gt=sum(gt_list)
+        final_gt_red=np.zeros(final_gt.shape + (3,), dtype=np.uint8)
+        final_gt_red[final_gt>0]=fp_color
+        plt.imsave(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'#gt.png'),final_gt_red)
     plt.close()
 
 
