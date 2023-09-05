@@ -52,25 +52,26 @@ def main():
     # gt_name = 'Study45-9_gt'
     # gt_name = 'Study45-9_gt(alltoone)'
     # gt_name = 'Study45-9_gt(simpleseg)'
-    gt_name = 'cewan-gt'
+    # gt_name = 'cewan-gt'
     # gt_name = 'cewan-gtall'
     # gt_name = 'cewan-gt(simpleseg)'
+    gt_name = 'cewan-gt(DeepSSM)'
 
 
     # algo_name_list = ['Study45-9_DeepSSM','Study_gtacm','Study_gtsam','Study45-9_ssm','Study45-9_ssmrcf']
     # algo_name_list = ['Study5-1_nnunet','Study45-9_nnunet(alltoone)']
     # algo_name_list = ['Study5-1_simpleseg','Study45-9_simpleseg']
-    algo_name_list = ['cewan_DeepSSM','cewan-ssracm','cewan-gt+sam','cewan-ssm','cewan-ssmrcf']
+    # algo_name_list = ['cewan-ssracm','cewan-gt+sam','cewan-ssm','cewan-ssmrcf']
     # algo_name_list = ['cewan-nnunet']
     # algo_name_list = ['cewan-simpleseg']
-
+    algo_name_list = ['cewan-DeepSSM']
     # patient_id = 'Study_12'
-    patient_id = 'PUMCH_006'
+    patient_id = 'PUMCH_002'
 
     # muscle_name_list = ["psoas_left", "psoas_right", "erector_spinae_left", "erector_spinae_right"]
     muscle_name_list=["PML","PMR","ESL","ESR","MFL","MFR"]
 
-    selected_slice = 11  # Specify the desired z-slice
+    selected_slice = 94 # Specify the desired z-slice
     tp_color = [255, 255, 0]  # Yellow color for TP
     fp_color = [255, 0, 0]  # Red color for FP
     fn_color = [0, 255,0]  # Green color for FN
@@ -78,13 +79,14 @@ def main():
     fp_alpha = 0.5  # Transparency for FP
     fn_alpha = 0.5  # Transparency for FN
     background_darken_factor = 0.25  # Factor to darken the background image https://blog.csdn.net/xvvoly/article/details/105157455
-    cropping_ratio = 1  # Cropping ratio (0.8 means 80% of the original size) #0.5/0.8/0.85 for study 0.75/1 for XH
+    cropping_ratio = 0.5  # Cropping ratio (0.8 means 80% of the original size) #0.5/0.8/0.85 for study 0.75/1 for XH
     img_out_path=os.path.join(mask_base_path,'ResultVisualization')
     if not os.path.exists(img_out_path):
         os.makedirs(img_out_path)
 
-    background_path = 'D:\\Keenster\\MatlabScripts\\KeensterSSM\\'+patient_id+'\\'+patient_id+'.nii.gz'  # Replace with the path to your background image
+    # background_path = 'D:\\Keenster\\MatlabScripts\\KeensterSSM\\'+patient_id+'\\'+patient_id+'.nii.gz'  # Replace with the path to your background image
     # background_path = 'D:\\Keenster\\Projects\\simpleseg-master\\AtlasSeg-Muscle\\data\\NIFTI_CONVERTED\\'+patient_id+'\\'+patient_id+'.nii.gz'  # Replace with the path to your background image
+    background_path = 'D:\\Keenster\\Projects\\SSMSeg-Muscle\\DeepSSM\\Output\\deep_ssm_muscle\\muscle-t1\\imagesTr\\'+patient_id+'.nrrd'  # Replace with the path to your background image
 
     background = sitk.ReadImage(background_path)
     background = sitk.GetArrayFromImage(background[:, :, selected_slice])
@@ -177,7 +179,7 @@ def main():
         save_subfig(fig, ax, img_out_path, patient_id + '#' + str(selected_slice)+ '#' +algo_name + '.png')
     plt.title('Slice='+str(selected_slice))
     plt.show()
-    fig.savefig(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'#part1.png'))
+    fig.savefig(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'#part4.png'))
     if img_and_gt_mode:
         plt.imsave(os.path.join(img_out_path,patient_id+'#'+str(selected_slice)+'#img.png'),background_crop, cmap='gray')
         final_gt=sum(gt_list)
